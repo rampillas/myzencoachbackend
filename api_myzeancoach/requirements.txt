@@ -27,7 +27,7 @@ pockets==0.3  # required for sphinx-contrib-napoleon
 sphinxcontrib-napoleon==0.5.0
 click==6.6  # required by sphinx-intl
 sphinx-intl==0.9.9
-pycrypto==2.6.1
+#pycrypto==2.6.1
 dj-database-url==0.3.0
 django-cors-headers==1.1.0
 requests==2.11.1
