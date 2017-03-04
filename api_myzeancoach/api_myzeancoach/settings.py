@@ -91,8 +91,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'tfm',
         'USER': 'usertfm',
-        'PASSWORD': 'hdsoihf9s8hf98ewhcoxih89ewf21',
-        'HOST': 'localhost',
+        'PASSWORD': 'hdsoihf9s8hf98',
+        'HOST': 'pgsql02.dinaserver.com',
         'PORT': '5432',
     }
 }
