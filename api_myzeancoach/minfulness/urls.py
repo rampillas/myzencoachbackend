@@ -4,8 +4,7 @@ from common import routers
 from . import views
 
 router = routers.SimpleRouter()
-router.register(r'videos', views.VideosViewSet)
-router.register(r'survey', views.SurveyViewSet)
+router.register(r'plans', views.WellnessPlanViewSet)
 
 urlpatterns = patterns(
     '',

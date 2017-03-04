@@ -11,4 +11,5 @@ urlpatterns = patterns(
     url(r'^accounts/', include('django.contrib.auth.urls')),
     url(r'^', include('users.urls')),
     url(r'^essential_information/', include('essential_information.urls')),
+    url(r'^minfulness/', include('minfulness.urls')),
 )

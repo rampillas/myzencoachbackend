@@ -25,7 +25,9 @@ INSTALLED_APPS = (
     'django_filters',
     'rest_framework',
     'rest_framework_nested',
-    'users'
+    'users',
+    'essential_information',
+    'minfulness'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -92,7 +94,7 @@ DATABASES = {
         'NAME': 'tfm',
         'USER': 'usertfm',
         'PASSWORD': 'hdsoihf9s8hf98',
-        'HOST': 'pgsql02.dinaserver.com',
+        'HOST': 'localhost',
         'PORT': '5432',
     }
 }
