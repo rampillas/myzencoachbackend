@@ -12,7 +12,7 @@ class VideosSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Videos
         fields = (
-            'user', 'name', 'url', 'new_attr', 'is_watched', 'date'
+            'user', 'name', 'url', 'new_attr', 'is_watched', 'date', 'photo_url'
         )
 
     def __init__(self, *args, **kwargs):

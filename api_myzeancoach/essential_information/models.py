@@ -13,6 +13,7 @@ class Videos(models.Model):
     new_attr = models.IntegerField(default=0)
     is_watched = models.BooleanField(default=False)
     date = models.DateTimeField(_(u'date'), auto_now_add=True)
+    photo_url = models.TextField(blank=True, null=True, default=None)
 
     class Meta:
         verbose_name = "Video"

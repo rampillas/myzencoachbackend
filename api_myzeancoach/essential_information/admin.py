@@ -2,7 +2,7 @@ from django.contrib import admin
 from models import Videos, Survey, Question, Answer
 
 class VideosAdmin(admin.ModelAdmin):
-    list_display = ('user', 'name', 'url', 'new_attr', 'is_watched', 'date')
+    list_display = ('user', 'name', 'url', 'new_attr', 'is_watched', 'date','photo_url')
 
     search_fields = ['user', 'name']
 

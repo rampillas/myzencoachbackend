@@ -35,7 +35,8 @@ class VideosViewSet(mixins.CreateModelMixin,
                         "url": data.get("url",False),
                         "new_attr": data.get("new_attr",False),
                         "is_watched": data.get("is_watched",False),
-                        "date": data.get("date",False)
+                        "date": data.get("date",False),
+                        'photo_url': data.get("photo_url",False)
                     }
                     #Create Video
                     video = Videos.objects.create(**validate_data)
