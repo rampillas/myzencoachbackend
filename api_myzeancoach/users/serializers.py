@@ -13,7 +13,8 @@ class ProfileSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Profile
         fields = (
-            'nick', 'birthday', 'gender', 'country', 'city', 'description'
+            'nick', 'birthday', 'gender', 'country', 'city', 'description', 'rural_zone','change_country',
+            'level_studies'
         )
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):

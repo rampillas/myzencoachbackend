@@ -13,6 +13,9 @@ class Profile(models.Model):
     country = models.CharField(max_length=100,blank=True)
     city = models.CharField(max_length=100,blank=True)
     description = models.CharField(max_length=100,blank=True)
+    rural_zone = models.CharField(max_length=100, blank=True)
+    change_country = models.CharField(max_length=10, blank=True)
+    level_studies = models.CharField(max_length=100, blank=True)
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
@@ -32,6 +35,9 @@ def update_profile(username, data):
         user.profile.country = data.get("country",False)
         user.profile.city = data.get("city",False)
         user.profile.description = data.get("description",False)
+        user.profile.rural_zone = data.get("rural_zone", False)
+        user.profile.change_country = data.get("change_country", False)
+        user.profile.level_studies = data.get("level_studies", False)
         user.save()
 
     return user
