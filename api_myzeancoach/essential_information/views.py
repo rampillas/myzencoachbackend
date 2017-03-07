@@ -58,7 +58,6 @@ class VideosViewSet(mixins.CreateModelMixin,
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
-
 class SurveyViewSet(mixins.CreateModelMixin,
                   mixins.RetrieveModelMixin,
                   mixins.ListModelMixin,
@@ -82,33 +81,36 @@ class SurveyViewSet(mixins.CreateModelMixin,
             users = User.objects.all()
             if users:
                 for user in users:
-                    validate_data = {
-                        "user": user,
-                        "description": data.get("description",False),
-                        "score": data.get("score",False),
-                        "is_completed": False
-                    }
-                    #Create Survey
-                    survey = Survey.objects.create(**validate_data)
-                    if survey:
-                        #Create Questions
-                        if data.get("questions",False):
-                            for question_item in data.get("questions"):
-                                validate_data = {
-                                    "survey": survey,
-                                    "description": question_item.get("description",False),
-                                    "is_completed": False
-                                }
-                                question = Question.objects.create(**validate_data)
-                                #Create Answer
-                                if question and "answers" in question_item:
-                                    for answer in question_item["answers"]:
-                                        validate_data = {
-                                            "question": question,
-                                            "description": answer.get("description"),
-                                            "is_right": False
-                                        }
-                                        answer = Answer.objects.create(**validate_data)
+                    video = Videos.objects.get(name=data.get("name",False),user=user)
+                    if video:
+                        validate_data = {
+                            "user": user,
+                            "video": video,
+                            "description": data.get("description",False),
+                            "score": data.get("score",False),
+                            "is_completed": False
+                        }
+                        #Create Survey
+                        survey = Survey.objects.create(**validate_data)
+                        if survey:
+                            #Create Questions
+                            if data.get("questions",False):
+                                for question_item in data.get("questions"):
+                                    validate_data = {
+                                        "survey": survey,
+                                        "description": question_item.get("description",False),
+                                        "is_completed": False
+                                    }
+                                    question = Question.objects.create(**validate_data)
+                                    #Create Answer
+                                    if question and "answers" in question_item:
+                                        for answer in question_item["answers"]:
+                                            validate_data = {
+                                                "question": question,
+                                                "description": answer.get("description"),
+                                                "is_right": False
+                                            }
+                                            answer = Answer.objects.create(**validate_data)
 
                 serializer = SurveySerializer(survey,context={'request': request})
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -122,6 +124,7 @@ class SurveyViewSet(mixins.CreateModelMixin,
             survey = Survey.objects.get(user_id=request.user.id, description=data.get("description", False))
             if survey:
                 survey.is_completed = True
+                survey.score = data.get("score", False)
                 survey.save()
                 questions = Question.objects.filter(survey=survey)
                 if questions:

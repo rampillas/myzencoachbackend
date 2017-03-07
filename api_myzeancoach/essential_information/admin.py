@@ -7,7 +7,7 @@ class VideosAdmin(admin.ModelAdmin):
     search_fields = ['user', 'name']
 
 class SurveyAdmin(admin.ModelAdmin):
-    list_display = ('user', 'description', 'score', 'is_completed')
+    list_display = ('user', 'description', 'score', 'is_completed', 'video')
 
     search_fields = ['user', 'description']
 

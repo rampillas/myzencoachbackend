@@ -19,12 +19,12 @@ class Videos(models.Model):
         verbose_name = "Video"
         verbose_name_plural = "Videos"
 
-
 class Survey(models.Model):
     """
     Surveys for users
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    video = models.ForeignKey(Videos, on_delete=models.CASCADE,related_name='survey')
     description = models.TextField(blank=True, null=False, default=None)
     score = models.IntegerField(default=0)
     is_completed = models.BooleanField(default=False)
