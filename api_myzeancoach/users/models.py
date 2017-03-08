@@ -7,7 +7,6 @@ from django.utils.translation import ugettext_lazy as _
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    nick = models.CharField(max_length=100,blank=True)
     birthday = models.DateField(null=True, blank=True)
     gender = models.CharField(max_length=10,blank=True)
     country = models.CharField(max_length=100,blank=True)
@@ -29,7 +28,6 @@ def save_user_profile(sender, instance, **kwargs):
 def update_profile(username, data):
     user = User.objects.get(username=username)
     if user:
-        user.profile.nick = data.get("nick",False)
         user.profile.birthday = data.get("birthday",False)
         user.profile.gender = data.get("gender",False)
         user.profile.country = data.get("country",False)

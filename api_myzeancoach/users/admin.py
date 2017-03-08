@@ -3,7 +3,7 @@ from models import Profile, Emoticon
 
 class ProfileAdmin(admin.ModelAdmin):
     list_display = (
-        'user', 'nick', 'birthday', 'gender',
+        'user', 'birthday', 'gender',
         'country', 'city', 'rural_zone','change_country','level_studies')
 
     search_fields = ['user', 'nick']
