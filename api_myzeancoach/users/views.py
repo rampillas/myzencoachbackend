@@ -3,10 +3,13 @@ from django.contrib.auth.models import User
 from models import update_profile,Emoticon
 from rest_framework import mixins,viewsets
 from rest_framework import status
+from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 from users.permissions import IsAuthenticatedOrCreateOrRecoverOnly, IsOwnerOrReadOrRecoverOnly
 from users.serializers import UserSerializer
 from serializers import EmoticonSerializer
+from users.forms import PasswordResetForm
+from django.contrib.auth.tokens import default_token_generator
 
 class UserViewSet(mixins.CreateModelMixin,
                   mixins.RetrieveModelMixin,
@@ -56,6 +59,85 @@ class UserViewSet(mixins.CreateModelMixin,
 
         return Response({},status=status.HTTP_400_BAD_REQUEST)
 
+    @detail_route(methods=['put'], url_path='password')
+    def set_password(self, request, **kwargs):
+        """
+        Endpoint for setting user's password.
+        """
+        user = self.get_object()
+
+        serializer = self.get_serializer(instance=user, data=request.data)
+        from django.utils.http import urlsafe_base64_decode
+
+        # VALIDATE TOKEN
+        if request.data['password'] == "" and \
+                        request.data['token'] != "" and \
+                        request.data['uid'] != "":
+            try:
+                from django.contrib.auth import get_user_model
+                user_model = get_user_model()
+                user = user_model.objects.get(pk=urlsafe_base64_decode(request.data['uid']))
+                if default_token_generator.check_token(user, request.data['token']):
+                    # token ok
+                    return Response({"detail": "ok"})
+                else:
+                    # wrong token
+                    return Response({"detail": "error"})
+            except:
+                return Response({"detail": "bad request"})
+        else:
+            # CHANGE PASSWORD
+            if serializer.is_valid():
+                uidb64 = serializer.validated_data['uid']
+                token = serializer.validated_data['token']
+                token_generator = default_token_generator
+
+                if uidb64 is not None and token is not None:
+                    uid = urlsafe_base64_decode(uidb64)
+                    try:
+                        from django.contrib.auth import get_user_model
+                        user_model = get_user_model()
+                        user = user_model.objects.get(pk=uid)
+
+                        if default_token_generator.check_token(user, token):
+
+                            user.set_password(serializer.validated_data['password'])
+                            user.save()
+                            # return Response(serializer.data)
+                            return Response({"detail": "ok"})
+                        else:
+                            return Response({"error": "token used"})
+                    except:
+                        return Response({"error": "io exception"})
+
+                else:
+                    return Response({"error": "token expired"})
+
+            else:
+                return Response(serializer.errors,
+                                status=status.HTTP_400_BAD_REQUEST)
+
+    @detail_route(methods=['post'], url_path='password-recovery')
+    def recover_password(self, request, **kwargs):
+        """
+        Endpoint for requesting user's password recovery.
+        """
+        user = self.get_object()
+        form = PasswordResetForm({'email': user.email})
+        if form.is_valid():
+            opts = {
+                'use_https': request.is_secure(),
+                'token_generator': default_token_generator,
+                'from_email': None,
+                'email_template_name': 'password_reset_email.html',
+                'subject_template_name': 'password_reset_subject.txt',
+                'request': request,
+                'html_email_template_name': None,
+            }
+            form.save(**opts)
+            return Response({"detail": "ok"})
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 class EmoticonViewSet(mixins.CreateModelMixin,
                   mixins.RetrieveModelMixin,

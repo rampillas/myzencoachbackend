@@ -13,7 +13,7 @@ class Profile(models.Model):
     city = models.CharField(max_length=100,blank=True)
     description = models.CharField(max_length=100,blank=True)
     rural_zone = models.CharField(max_length=100, blank=True)
-    change_country = models.CharField(max_length=10, blank=True)
+    change_country = models.BooleanField(default=False)
     level_studies = models.CharField(max_length=100, blank=True)
 
 @receiver(post_save, sender=User)

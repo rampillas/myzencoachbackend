@@ -152,3 +152,13 @@ if DEBUG:
     )
 
 AUTH_PROFILE_MODULE = 'users.Profile'
+
+"""
+EMAIL CONFIGURATION (for project's outgoing email messages)
+"""
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_PASSWORD = 'mejorequipo'
+EMAIL_HOST_USER = 'myzeancoach@gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
