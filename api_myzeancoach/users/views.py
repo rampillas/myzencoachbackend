@@ -1,5 +1,6 @@
 import json
 from django.contrib.auth.models import User
+from django.views.decorators.csrf import csrf_exempt
 from models import update_profile,Emoticon
 from rest_framework import mixins,viewsets
 from rest_framework import status
@@ -10,6 +11,9 @@ from users.serializers import UserSerializer
 from serializers import EmoticonSerializer
 from users.forms import PasswordResetForm
 from django.contrib.auth.tokens import default_token_generator
+from django.conf import settings
+import urllib2
+from django.http import HttpResponse
 
 class UserViewSet(mixins.CreateModelMixin,
                   mixins.RetrieveModelMixin,
@@ -117,27 +121,58 @@ class UserViewSet(mixins.CreateModelMixin,
                 return Response(serializer.errors,
                                 status=status.HTTP_400_BAD_REQUEST)
 
-    @detail_route(methods=['post'], url_path='password-recovery')
-    def recover_password(self, request, **kwargs):
-        """
-        Endpoint for requesting user's password recovery.
-        """
-        user = self.get_object()
-        form = PasswordResetForm({'email': user.email})
-        if form.is_valid():
-            opts = {
-                'use_https': request.is_secure(),
-                'token_generator': default_token_generator,
-                'from_email': None,
-                'email_template_name': 'password_reset_email.html',
-                'subject_template_name': 'password_reset_subject.txt',
-                'request': request,
-                'html_email_template_name': None,
-            }
-            form.save(**opts)
-            return Response({"detail": "ok"})
-        else:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+@csrf_exempt
+def recover_password(request):
+    """Endpoint for requesting user's password recovery."""
+    data = request.body
+    if data:
+        try:
+            data = json.loads(data)
+            user = User.objects.get(username=data.get("username",False))
+            if user:
+                form = PasswordResetForm({'email': user.email})
+                if form.is_valid():
+                    opts = {
+                        'use_https': request.is_secure(),
+                        'token_generator': default_token_generator,
+                        'from_email': None,
+                        'email_template_name': 'password_reset_email.html',
+                        'subject_template_name': 'password_reset_subject.txt',
+                        'request': request,
+                        'html_email_template_name': None,
+                    }
+                    form.save(**opts)
+                    return HttpResponse(json.dumps({"detail": "ok"}), status=status.HTTP_200_OK,
+                                        content_type="application/json")
+        except Exception as e:
+            pass
+    return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
+
+@csrf_exempt
+def login(request):
+    """Login for Users"""
+    data = request.body
+    if data:
+        try:
+            data = json.loads(data)
+            client_id = data.get("client_id", False)
+            client_secret = data.get("client_secret", False)
+            username = data.get("username", False)
+            password = data.get("password", False)
+            grant_type = data.get("grant_type", False)
+            scope = data.get("scope", False)
+
+            url = settings.URL_LOGIN + "?client_id=" + client_id + "&client_secret=" + \
+                  client_secret + "&username=" + username + "&password=" + password + \
+                  "&grant_type=" + grant_type + "&scope=" + scope
+            req = urllib2.Request(url)
+            req.get_method = lambda: 'POST'
+            res = urllib2.urlopen(req).read()
+            if res:
+                return HttpResponse(res, status=status.HTTP_200_OK,content_type="application/json")
+        except Exception as e:
+            pass
+    return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
 
 class EmoticonViewSet(mixins.CreateModelMixin,
                   mixins.RetrieveModelMixin,

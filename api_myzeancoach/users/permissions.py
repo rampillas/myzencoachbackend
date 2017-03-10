@@ -9,7 +9,7 @@ class IsAuthenticatedOrCreateOrRecoverOnly(permissions.BasePermission):
     """
 
     def has_permission(self, request, view):
-        if view.action in {'create', 'recover_password', 'set_password'} or request.method == 'OPTIONS':
+        if view.action in {'create', 'set_password'} or request.method == 'OPTIONS':
             return True
         return request.user and request.user.is_authenticated()
 
@@ -28,7 +28,7 @@ class IsOwnerOrReadOrRecoverOnly(permissions.BasePermission):
     def has_permission(self, request, view):
         if (
                 view.kwargs.get('username', None) and (
-                    (view.action not in ['set_password','recover_password'] and
+                    (view.action not in ['set_password'] and
                             request.method not in permissions.SAFE_METHODS)
                 )
         ):

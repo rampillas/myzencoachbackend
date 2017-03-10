@@ -90,12 +90,12 @@ WSGI_APPLICATION = 'api_myzeancoach.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'tfm',
-        'USER': 'usertfm',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'demendezr$default',
+        'USER': 'demendezr',
         'PASSWORD': 'hdsoihf9s8hf98',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'HOST': 'demendezr.mysql.pythonanywhere-services.com',
+        'PORT': '3306',
     }
 }
 
@@ -162,3 +162,5 @@ EMAIL_HOST_PASSWORD = 'mejorequipo'
 EMAIL_HOST_USER = 'myzeancoach@gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+
+URL_LOGIN = "http://demendezr.pythonanywhere.com/oauth/token/"
