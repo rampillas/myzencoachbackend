@@ -12,6 +12,6 @@ urlpatterns = patterns(
     url(r'^', include('users.urls')),
     url(r'^essential_information/', include('essential_information.urls')),
     url(r'^minfulness/', include('minfulness.urls')),
-    url(r'^login', 'users.views.login'),
-    url(r'^password-recovery', 'users.views.recover_password'),
+    url(r'^login', 'users.views.login',name="login"),
+    url(r'^password-recovery', 'users.views.recover_password',name="password-recovery"),
 )
