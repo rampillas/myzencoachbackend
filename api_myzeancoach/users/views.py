@@ -165,9 +165,11 @@ def login(request):
             url = settings.URL_LOGIN + "?client_id=" + client_id + "&client_secret=" + \
                   client_secret + "&username=" + username + "&password=" + password + \
                   "&grant_type=" + grant_type + "&scope=" + scope
-            req = urllib2.Request(url)
-            req.get_method = lambda: 'POST'
-            res = urllib2.urlopen(req).read()
+            #req = urllib2.Request(url)
+            #req.get_method = lambda: 'POST'
+            #res = urllib2.urlopen(req).read()
+            import requests
+            res = requests.post(url,data={})
             if res:
                 return HttpResponse(res, status=status.HTTP_200_OK,content_type="application/json")
         except Exception as e:
