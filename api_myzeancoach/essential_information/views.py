@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from rest_framework import viewsets, mixins, status
+from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 from serializers import VideosSerializer, SurveySerializer
 from models import Videos, Survey, Question, Answer
@@ -108,7 +109,7 @@ class SurveyViewSet(mixins.CreateModelMixin,
                                             validate_data = {
                                                 "question": question,
                                                 "description": answer.get("description"),
-                                                "is_right": False
+                                                "is_right": answer.get("is_right")
                                             }
                                             answer = Answer.objects.create(**validate_data)
 
@@ -132,5 +133,21 @@ class SurveyViewSet(mixins.CreateModelMixin,
                         question.is_completed = True
                         question.save()
             return Response(status=status.HTTP_200_OK)
+
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    @detail_route(methods=['get'], url_path='ranking')
+    def get_ranking(self, request, **kwargs):
+        try:
+            query = "select 1 as id, u.username,sum(eis.score) as score from essential_information_survey eis " \
+                    "inner join auth_user u on u.id =  eis.user_id " \
+                    "group by u.username order by sum(eis.score) desc limit 5"
+            res = []
+            for r in Survey.objects.raw(query):
+                res.append({"username":r.username,"score":r.score})
+
+            return Response(res, status=status.HTTP_200_OK)
+        except Exception as e:
+            pass
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
