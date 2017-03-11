@@ -162,16 +162,19 @@ def login(request):
             grant_type = data.get("grant_type", False)
             scope = data.get("scope", False)
 
-            url = settings.URL_LOGIN + "?client_id=" + client_id + "&client_secret=" + \
+            url = '/oauth/token/' + "?client_id=" + client_id + "&client_secret=" + \
                   client_secret + "&username=" + username + "&password=" + password + \
                   "&grant_type=" + grant_type + "&scope=" + scope
-            #req = urllib2.Request(url)
-            #req.get_method = lambda: 'POST'
-            #res = urllib2.urlopen(req).read()
-            import requests
-            res = requests.post(url,data={})
+
+            from oauth2_provider.settings import oauth2_settings
+            server = oauth2_settings.OAUTH2_SERVER_CLASS(oauth2_settings.OAUTH2_VALIDATOR_CLASS())
+            headers, body, status_res = server.create_token_response(url, "POST", "",{}, None)
+
+            res = HttpResponse(content=body, status=status_res, content_type="application/json")
+            for k, v in headers.items():
+                res[k] = v
             if res:
-                return HttpResponse(res, status=status.HTTP_200_OK,content_type="application/json")
+                return res
         except Exception as e:
             pass
     return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
