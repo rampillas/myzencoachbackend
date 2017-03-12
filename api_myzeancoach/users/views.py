@@ -72,7 +72,6 @@ class UserViewSet(mixins.CreateModelMixin,
 
         serializer = self.get_serializer(instance=user, data=request.data)
         from django.utils.http import urlsafe_base64_decode
-
         # VALIDATE TOKEN
         if request.data['password'] == "" and \
                         request.data['token'] != "" and \
@@ -91,35 +90,28 @@ class UserViewSet(mixins.CreateModelMixin,
                 return Response({"detail": "bad request"})
         else:
             # CHANGE PASSWORD
-            if serializer.is_valid():
-                uidb64 = serializer.validated_data['uid']
-                token = serializer.validated_data['token']
-                token_generator = default_token_generator
+            uidb64 = request.data['uid']
+            token = request.data['token']
+            token_generator = default_token_generator
 
-                if uidb64 is not None and token is not None:
-                    uid = urlsafe_base64_decode(uidb64)
-                    try:
-                        from django.contrib.auth import get_user_model
-                        user_model = get_user_model()
-                        user = user_model.objects.get(pk=uid)
+            if uidb64 is not None and token is not None:
+                uid = urlsafe_base64_decode(uidb64)
+                try:
+                    from django.contrib.auth import get_user_model
+                    user_model = get_user_model()
+                    user = user_model.objects.get(pk=uid)
 
-                        if default_token_generator.check_token(user, token):
-
-                            user.set_password(serializer.validated_data['password'])
-                            user.save()
-                            # return Response(serializer.data)
-                            return Response({"detail": "ok"})
-                        else:
-                            return Response({"error": "token used"})
-                    except:
-                        return Response({"error": "io exception"})
-
-                else:
-                    return Response({"error": "token expired"})
+                    if default_token_generator.check_token(user, token):
+                        user.set_password(request.data['password'])
+                        user.save()
+                        return Response({"detail": "ok"})
+                    else:
+                        return Response({"error": "token used"})
+                except:
+                    return Response({"error": "io exception"})
 
             else:
-                return Response(serializer.errors,
-                                status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": "token expired"})
 
 @csrf_exempt
 def recover_password(request):

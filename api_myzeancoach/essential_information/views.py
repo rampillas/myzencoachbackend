@@ -59,6 +59,17 @@ class VideosViewSet(mixins.CreateModelMixin,
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
+    def delete(self, request, *args, **kwargs):
+        #Delete a video
+        data = request.data
+        if data:
+            videos = Videos.objects.filter(name=data.get("name", False))
+            if videos:
+                for video in videos:
+                    video.delete()
+            return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
 class SurveyViewSet(mixins.CreateModelMixin,
                   mixins.RetrieveModelMixin,
                   mixins.ListModelMixin,
