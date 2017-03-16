@@ -10,6 +10,7 @@ class WellnessPlan(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateTimeField(_(u'date'), auto_now_add=True)
     description = models.TextField(blank=True, null=False, default=None)
+    is_finished = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "WellnessPlan"
@@ -25,6 +26,7 @@ class Exercise(models.Model):
     audio_url = models.TextField(blank=True, null=False, default=None)
     instructions = models.TextField(blank=True, null=False, default=None)
     feedback = models.TextField(blank=True, null=False, default=None)
+    appreciation = models.TextField(blank=True, null=False, default=None)
 
     class Meta:
         verbose_name = "Exercise"
@@ -39,6 +41,7 @@ class QuestionExercise(models.Model):
     question = models.TextField(blank=True, null=False, default=None)
     answer = models.BooleanField(default=False)
     is_answered = models.BooleanField(default=False)
+    response = models.TextField(blank=True, null=False, default=None)
 
     class Meta:
         verbose_name = "QuestionExercise"

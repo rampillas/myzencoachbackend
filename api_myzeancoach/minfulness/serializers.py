@@ -7,7 +7,7 @@ class QuestionExerciseSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuestionExercise
         fields = (
-            'question', 'answer', 'is_answered'
+            'question', 'answer', 'is_answered', 'response'
         )
 
 class ExerciseSerializer(serializers.ModelSerializer):
@@ -17,7 +17,8 @@ class ExerciseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Exercise
         fields = (
-            'week', 'description', 'audio_url', 'instructions', 'feedback', 'question_exercises'
+            'week', 'description', 'audio_url', 'instructions', 'feedback', 'appreciation',
+            'question_exercises'
         )
 
 class WellnessPlanSerializer(serializers.ModelSerializer):
@@ -33,7 +34,7 @@ class WellnessPlanSerializer(serializers.ModelSerializer):
     class Meta:
         model = WellnessPlan
         fields = (
-            'user', 'description' , 'date', 'exercises'
+            'user', 'description' , 'date', 'exercises', 'is_finished'
         )
 
 
