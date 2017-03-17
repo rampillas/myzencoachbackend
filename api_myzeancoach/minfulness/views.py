@@ -152,3 +152,14 @@ class WellnessPlanViewSet(mixins.CreateModelMixin,
                 pass
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, **kwargs):
+        #Delete a plan
+        data = request.data
+        if data:
+            plans = WellnessPlan.objects.filter(description=data.get("description", False))
+            if plans:
+                for plan in plans:
+                    plan.delete()
+            return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
