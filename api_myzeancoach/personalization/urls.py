@@ -5,6 +5,7 @@ from . import views
 
 router = routers.SimpleRouter()
 router.register(r'reminders', views.RemindersViewSet)
+router.register(r'rewards', views.RewardsViewSet)
 
 urlpatterns = patterns(
     '',
