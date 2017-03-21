@@ -27,7 +27,8 @@ INSTALLED_APPS = (
     'rest_framework_nested',
     'users',
     'essential_information',
-    'minfulness'
+    'minfulness',
+    'personalization'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -163,4 +164,4 @@ EMAIL_HOST_USER = 'myzeancoach@gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-URL_LOGIN = "http://demendezr.pythonanywhere.com/oauth/token/"
+URL_LOGIN = "http://192.168.0.3:8000/oauth/token/"
