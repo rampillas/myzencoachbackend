@@ -28,6 +28,13 @@ class RewardsSerializer(serializers.ModelSerializer):
         )
 
 
+class StressDetectionAnswersSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = StressDetectionAnswers
+        fields = (
+            'description', 'color', 'popup_message'
+        )
 
 class StressDetectionQuestionsSerializer(serializers.ModelSerializer):
 
@@ -37,26 +44,19 @@ class StressDetectionQuestionsSerializer(serializers.ModelSerializer):
         read_only=True
     )
 
+    questions = StressDetectionAnswersSerializer(many=True, read_only=True)
+
     class Meta:
         model = StressDetectionQuestions
         fields = (
-            'user', 'description', 'possible_answers', 'is_personal_question', 'active', 'user_answer'
-        )
-
-class StressDetectionAnswersSerializer(serializers.ModelSerializer):
-
-    questions = StressDetectionQuestionsSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Rewards
-        fields = (
-            'questions', 'description', 'color', 'popup_message'
+            'user', 'description', 'possible_answers', 'is_personal_question', 'active', 'user_answer',
+            'questions'
         )
 
 class CoachFollowUpSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = StressDetectionQuestions
+        model = CoachFollowUp
         fields = (
             'description', 'active'
         )

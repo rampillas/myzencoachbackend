@@ -2,7 +2,7 @@
 from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
-from serializers import RemindersSerializer,RewardsSerializer
+from serializers import RemindersSerializer,RewardsSerializer, StressDetectionQuestionsSerializer,CoachFollowUpSerializer
 from models import Reminders,Rewards,StressDetectionQuestions,StressDetectionAnswers,CoachFollowUp
 from users.permissions import IsAuthenticatedOrCreateOrRecoverOnly, IsOwnerOrReadOrRecoverOnly
 from django.contrib.auth.models import User
@@ -150,6 +150,107 @@ class RewardsViewSet(mixins.CreateModelMixin,
 
             if reward:
                 serializer = RewardsSerializer(reward, context={'request': request})
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class StressDetectionQuestionsViewSet(mixins.CreateModelMixin,
+                  mixins.RetrieveModelMixin,
+                  mixins.ListModelMixin,
+                  viewsets.GenericViewSet):
+
+    permission_classes = (IsAuthenticatedOrCreateOrRecoverOnly, IsOwnerOrReadOrRecoverOnly)
+    lookup_value_regex = '[^/]+'
+    queryset = StressDetectionQuestions.objects.all()
+    serializer_class = StressDetectionQuestionsSerializer
+
+    def get_queryset(self):
+        queryset = super(StressDetectionQuestionsViewSet, self).get_queryset()
+        queryset = queryset.filter(user_id=self.request.user.id)
+        return queryset
+
+    def create(self, request, *args, **kwargs):
+        #Get body data form request
+        data = request.data
+        if data:
+            users = User.objects.all()
+            if users:
+                for user in users:
+                    #Create Question
+                    validate_data = {
+                        'user': user,
+                        'description': data.get("description",False),
+                        'possible_answers': data.get("possible_answers",False),
+                        'is_personal_question': data.get("is_personal_question",False),
+                        'active': True,
+                        'user_answer': ""
+                    }
+                    question = StressDetectionQuestions.objects.create(**validate_data)
+
+                    if question:
+                        #Create answers
+                        if data.get("answers",False):
+                            for answer in data.get("answers"):
+                                validate_data = {
+                                    'question': question,
+                                    'description': answer.get("description",False),
+                                    'color': answer.get("color",False),
+                                    'popup_message': answer.get("popup_message",False)
+                                }
+                                answer_obj = StressDetectionAnswers.objects.create(**validate_data)
+
+
+                serializer = StressDetectionQuestionsSerializer(question, context={'request': request})
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+    @detail_route(methods=['post'], url_path='registerAnswerUser')
+    def register_answer_user(self, request, **kwargs):
+        data = request.data
+        if data:
+            try:
+                question = StressDetectionQuestions.objects.get(user_id=request.user.id,
+                                                                description = data.get("description",False))
+                if question:
+                    question.user_answer = data.get("user_answer", False)
+                    question.save()
+                    return Response(status=status.HTTP_200_OK)
+            except Exception as e:
+                pass
+
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class CoachFollowUpViewSet(mixins.CreateModelMixin,
+                  mixins.RetrieveModelMixin,
+                  mixins.ListModelMixin,
+                  viewsets.GenericViewSet):
+
+    permission_classes = (IsAuthenticatedOrCreateOrRecoverOnly, IsOwnerOrReadOrRecoverOnly)
+    lookup_value_regex = '[^/]+'
+    queryset = CoachFollowUp.objects.all()
+    serializer_class = CoachFollowUpSerializer
+
+    def get_queryset(self):
+        queryset = super(CoachFollowUpViewSet, self).get_queryset()
+        queryset = queryset.filter(active=True).order_by('?')[:1]
+        return queryset
+
+    def create(self, request, *args, **kwargs):
+        #Get body data form request
+        data = request.data
+        if data:
+            validate_data = {
+                'description': data.get("description"),
+                'active': True
+            }
+            follow = CoachFollowUp.objects.create(**validate_data)
+
+            if follow:
+                serializer = CoachFollowUpSerializer(follow, context={'request': request})
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
