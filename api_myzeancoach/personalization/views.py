@@ -53,6 +53,7 @@ class RemindersViewSet(mixins.CreateModelMixin,
                     validate_data = {
                         'user': user,
                         'title': data.get("title", False),
+                        'subtitle': data.get("subtitle", False),
                         'description': data.get("description", False),
                         'is_personal': data.get("is_personal", False),
                         'date': data.get("date", False),
@@ -83,6 +84,21 @@ class RemindersViewSet(mixins.CreateModelMixin,
                     return Response(status=status.HTTP_200_OK)
             except Exception as e:
                 pass
+
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    @detail_route(methods=['post'], url_path='getAllReminders')
+    def get_all_reminders(self, request, **kwargs):
+        try:
+            reminders = Reminders.objects.all()
+            res = []
+            if reminders:
+                for reminder in reminders:
+                    serializer = RemindersSerializer(reminder, context={'request': request})
+                    res.append(serializer.data)
+                return Response({"results":res},status=status.HTTP_200_OK)
+        except Exception as e:
+            pass
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -120,6 +136,19 @@ class RemindersViewSet(mixins.CreateModelMixin,
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
+    def delete(self, request, *args, **kwargs):
+        #Delete reminder
+        data = request.data
+        if data:
+            user = User.objects.get(username=data.get("username",False))
+            if user:
+                reminder = Reminders.objects.get(user=user,
+                                            title=data.get("title", False))
+                if reminder:
+                    reminder.delete()
+
+                    return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 class RewardsViewSet(mixins.CreateModelMixin,
                   mixins.RetrieveModelMixin,
@@ -154,6 +183,22 @@ class RewardsViewSet(mixins.CreateModelMixin,
 
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
+    @detail_route(methods=['post'], url_path='getReward')
+    def get_reward(self, request, **kwargs):
+        data = request.data
+        if data:
+            try:
+                reminder = Reminders.objects.get(user_id=request.user.id,
+                                                 title=data.get("title", False))
+                if reminder:
+                    reward = Rewards.objects.get(reminder=reminder)
+                    if reward:
+                        serializer = RewardsSerializer(reward, context={'request': request})
+                    return Response(serializer.data,status=status.HTTP_200_OK)
+            except Exception as e:
+                pass
+
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class StressDetectionQuestionsViewSet(mixins.CreateModelMixin,
@@ -224,6 +269,19 @@ class StressDetectionQuestionsViewSet(mixins.CreateModelMixin,
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
+    def delete(self, request, *args, **kwargs):
+        #Delete question
+        data = request.data
+        if data:
+            questions = StressDetectionQuestions.objects.filter(description=data.get("description",False))
+            if questions:
+                for question in questions:
+                    question.delete()
+
+                return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
 class CoachFollowUpViewSet(mixins.CreateModelMixin,
                   mixins.RetrieveModelMixin,
                   mixins.ListModelMixin,
@@ -254,3 +312,29 @@ class CoachFollowUpViewSet(mixins.CreateModelMixin,
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, **kwargs):
+        #Delete recomendation
+        data = request.data
+        if data:
+            recomendation = CoachFollowUp.objects.get(description=data.get("description",False))
+            if recomendation:
+                recomendation.delete()
+
+                return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    @detail_route(methods=['post'], url_path='getAllRecomendations')
+    def get_all_recomendations(self, request, **kwargs):
+        try:
+            recomendations = CoachFollowUp.objects.all()
+            res = []
+            if recomendations:
+                for recomendation in recomendations:
+                    serializer = CoachFollowUpSerializer(recomendation, context={'request': request})
+                    res.append(serializer.data)
+                return Response({"results": res}, status=status.HTTP_200_OK)
+        except Exception as e:
+            pass
+
+        return Response(status=status.HTTP_400_BAD_REQUEST)
