@@ -28,7 +28,8 @@ INSTALLED_APPS = (
     'users',
     'essential_information',
     'minfulness',
-    'personalization'
+    'personalization',
+    'solutions'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -163,5 +164,3 @@ EMAIL_HOST_PASSWORD = 'mejorequipo'
 EMAIL_HOST_USER = 'myzeancoach@gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-
-URL_LOGIN = "http://192.168.0.3:8000/oauth/token/"
