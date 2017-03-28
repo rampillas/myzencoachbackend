@@ -54,7 +54,27 @@ class DilemmaViewSet(mixins.CreateModelMixin,
                 if dilemmas:
                     for dilemma in dilemmas:
                         serializer = DilemmaSerializer(dilemma, context={'request': request})
-                        res.append(serializer.data)
+                        dilemma_data = serializer.data
+
+                        #Comments from users
+                        comments_data = []
+                        comments = CommentDilemma.objects.filter(dilemma=dilemma)
+                        if comments:
+                            for comment in comments:
+                                comment_serializer = CommentDilemmaSerializer(comment,context={'request': request})
+                                comments_data.append(comment_serializer.data)
+
+                        # Comments from coach
+                        comments_coach_data = []
+                        comments_coach = CommentDilemmaCoach.objects.filter(dilemma_coach=dilemma)
+                        if comments_coach:
+                            for comment in comments_coach:
+                                comment_coach_serializer = CommentDilemmaCoachSerializer(comment,context={'request': request})
+                                comments_coach_data.append(comment_coach_serializer.data)
+
+                        dilemma_data["comments"] = comments_data
+                        dilemma_data["comments_coach"] = comments_coach_data
+                        res.append(dilemma_data)
                     return Response({"results": res}, status=status.HTTP_200_OK)
             except Exception as e:
                 pass
@@ -95,10 +115,14 @@ class DilemmaViewSet(mixins.CreateModelMixin,
                 if user:
                     dilemma = Dilemma.objects.get(title=data.get("title", False), user=user)
                     if dilemma:
-                        coach_suggestion = CommentDilemmaCoach.objects.get(dilemma_coach=dilemma)
-                        if coach_suggestion:
-                            serializer = CommentDilemmaCoachSerializer(coach_suggestion,context={'request': request})
-                            return Response(serializer.data,status=status.HTTP_200_OK)
+                        coach_suggestions = CommentDilemmaCoach.objects.filter(dilemma_coach=dilemma)
+                        if coach_suggestions:
+                            res = []
+                            for suggestion in coach_suggestions:
+                                serializer = CommentDilemmaCoachSerializer(suggestion,context={'request': request})
+                                res.append(serializer.data)
+
+                            return Response({'results': res},status=status.HTTP_200_OK)
             except Exception as e:
                 pass
 
@@ -158,11 +182,33 @@ class DilemmaViewSet(mixins.CreateModelMixin,
                             "date": data["comment"]["date"],
                             "description": data["comment"]["description"],
                             "like": data["comment"]["like"],
-                            "feedback": data["comment"]["feedback"] or "",
-                            "date_feedback": data["comment"]["date_feedback"] or ""
+                            "feedback": "",
+                            "date_feedback": ""
                         }
 
                         comment_dilema = CommentDilemma.objects.create(**validate_data)
+                        return Response(status=status.HTTP_200_OK)
+            except Exception as e:
+                pass
+
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    @detail_route(methods=['post'], url_path='addFeedbackDilemma')
+    def add_feedback_dilemma(self, request, **kwargs):
+        data = request.data
+        if data:
+            try:
+                user = User.objects.get(username=data.get("username", False))
+                if user and data.get("comment", False):
+                    dilemma = Dilemma.objects.get(title=data.get("title", False), user=user)
+                    if dilemma:
+                        comment = CommentDilemma.objects.get(dilemma =dilemma,
+                                                             description=data.get("description",False))
+                        if comment:
+                            comment.feedback = data["comment"]["feedback"]
+                            comment.date_feedback = data["comment"]["date_feedback"]
+                            comment.save()
+
                         return Response(status=status.HTTP_200_OK)
             except Exception as e:
                 pass
@@ -223,4 +269,50 @@ class DilemmaViewSet(mixins.CreateModelMixin,
                     dilemma.delete()
 
                     return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    @detail_route(methods=['post'], url_path='getAllTypeDilemmas')
+    def get_all_type_dilemmas(self, request, **kwargs):
+        data = request.data
+        if data:
+            try:
+                dilemmas = Dilemma.objects.all()
+                res = []
+                if dilemmas:
+                    for dilemma in dilemmas:
+                        serializer = DilemmaSerializer(dilemma, context={'request': request})
+                        dilemma_data = serializer.data
+
+                        add_dilemma = True
+                        #Get all dilemmas except form other users with state refused
+                        if dilemma_data["nick_user"] != data.get("username",False):
+                            if dilemma_data["state"] == "refused":
+                                add_dilemma = False
+
+                        # Comments from users
+                        comments_data = []
+                        comments = CommentDilemma.objects.filter(dilemma=dilemma)
+                        if comments:
+                            for comment in comments:
+                                comment_serializer = CommentDilemmaSerializer(comment, context={'request': request})
+                                comments_data.append(comment_serializer.data)
+
+                        # Comments from coach
+                        comments_coach_data = []
+                        comments_coach = CommentDilemmaCoach.objects.filter(dilemma_coach=dilemma)
+                        if comments_coach:
+                            for comment in comments_coach:
+                                comment_coach_serializer = CommentDilemmaCoachSerializer(comment,
+                                                                                         context={'request': request})
+                                comments_coach_data.append(comment_coach_serializer.data)
+
+                        dilemma_data["comments"] = comments_data
+                        dilemma_data["comments_coach"] = comments_coach_data
+
+                        if add_dilemma:
+                            res.append(dilemma_data)
+                    return Response({"results": res}, status=status.HTTP_200_OK)
+            except Exception as e:
+                pass
+
         return Response(status=status.HTTP_400_BAD_REQUEST)
