@@ -440,6 +440,7 @@ class DilemmaViewSet(mixins.CreateModelMixin,
                     comment = CommentDilemma.objects.get(dilemma=dilemma,description=data.get("description",False))
                     if comment:
                         comment.like = True
+                        comment.date_feedback = data.get("date",False)
                         comment.save()
 
                     return Response(status=status.HTTP_200_OK)
