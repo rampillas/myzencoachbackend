@@ -203,7 +203,7 @@ class DilemmaViewSet(mixins.CreateModelMixin,
                             "nick_user": data["comment"]["nick_user"],
                             "date": data["comment"]["date"],
                             "description": data["comment"]["description"],
-                            "like": data["comment"]["like"],
+                            "like": False,
                             "feedback": "",
                             "date_feedback": ""
                         }
@@ -417,8 +417,33 @@ class DilemmaViewSet(mixins.CreateModelMixin,
                     dilemma_data["comments_coach"] = comments_coach_data
                     res.append(dilemma_data)
                 return Response({"results": res}, status=status.HTTP_200_OK)
-            
+
         except Exception as e:
             pass
+
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    @detail_route(methods=['post'], url_path='selectBestComment')
+    def select_best_comment(self, request, **kwargs):
+        data = request.data
+        if data:
+            try:
+                dilemma = Dilemma.objects.get(title=data.get("title", False))
+                if dilemma:
+                    comments = CommentDilemma.objects.filter(dilemma=dilemma)
+                    if comments:
+                        for comment in comments:
+                            if comment.like:
+                                comment.like = False
+                                comment.save()
+
+                    comment = CommentDilemma.objects.get(dilemma=dilemma,description=data.get("description",False))
+                    if comment:
+                        comment.like = True
+                        comment.save()
+
+                    return Response(status=status.HTTP_200_OK)
+            except Exception as e:
+                pass
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
