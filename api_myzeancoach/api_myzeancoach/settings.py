@@ -29,7 +29,8 @@ INSTALLED_APPS = (
     'essential_information',
     'minfulness',
     'personalization',
-    'solutions'
+    'solutions',
+    'freetime'
 )
 
 MIDDLEWARE_CLASSES = (

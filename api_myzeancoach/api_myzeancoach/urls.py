@@ -14,6 +14,7 @@ urlpatterns = patterns(
     url(r'^minfulness/', include('minfulness.urls')),
     url(r'^personalization/', include('personalization.urls')),
     url(r'^solutions/', include('solutions.urls')),
+    url(r'^freetime/', include('freetime.urls')),
     url(r'^login', 'users.views.login',name="login"),
     url(r'^password-recovery', 'users.views.recover_password',name="password-recovery"),
 )
