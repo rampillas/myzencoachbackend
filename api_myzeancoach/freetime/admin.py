@@ -1,5 +1,5 @@
 from django.contrib import admin
-from models import Events, CommentEvent, Interests
+from models import Events, CommentEvent, Interests, UserEventLike
 
 class EventsAdmin(admin.ModelAdmin):
     list_display = ('user', 'date', 'title', 'description', 'likes', 'category')
@@ -11,6 +11,11 @@ class CommentEventAdmin(admin.ModelAdmin):
 
     search_fields = ['description']
 
+class UserEventLikeAdmin(admin.ModelAdmin):
+    list_display = ('user', 'event', 'is_liked')
+
+    search_fields = ['user']
+
 class InterestsAdmin(admin.ModelAdmin):
     list_display = ('user', 'name')
 
@@ -18,4 +23,5 @@ class InterestsAdmin(admin.ModelAdmin):
 
 admin.site.register(Events, EventsAdmin)
 admin.site.register(CommentEvent, CommentEventAdmin)
+admin.site.register(UserEventLike, UserEventLikeAdmin)
 admin.site.register(Interests, InterestsAdmin)

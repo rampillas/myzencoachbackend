@@ -2,8 +2,8 @@
 from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
-from serializers import EventsSerializer, CommentEventSerializer, InterestsSerializer
-from models import Events, CommentEvent, Interests
+from serializers import EventsSerializer, CommentEventSerializer, InterestsSerializer, UserEventLikeSerializer
+from models import Events, CommentEvent, Interests, UserEventLike
 from users.permissions import IsAuthenticatedOrCreateOrRecoverOnly, IsOwnerOrReadOrRecoverOnly
 from django.contrib.auth.models import User
 
@@ -57,6 +57,7 @@ class EventsViewSet(mixins.CreateModelMixin,
             #Get all events
             events = Events.objects.all()
             if events:
+                user = User.objects.get(pk=request.user.id)
                 for event in events:
                     event_serializer = EventsSerializer(event, context={'request': request})
                     event_data = event_serializer.data
@@ -66,8 +67,20 @@ class EventsViewSet(mixins.CreateModelMixin,
                     if comments:
                         for comment in comments:
                             comment_serializer = CommentEventSerializer(comment, context={'request': request})
-                            print(comment_serializer.data)
                             comments_data.append(comment_serializer.data)
+
+                    if user:
+                        event_data["user_like"] = {
+                                        'user': user.username,
+                                        'event': event.title,
+                                        'is_liked': False
+                                    }
+                        user_like = UserEventLike.objects.filter(event=event,user=user)
+                        if user_like:
+                            for ul in user_like:
+                                user_like_serializer = UserEventLikeSerializer(ul, context={'request': request})
+
+                            event_data["user_like"] = user_like_serializer.data
 
                     event_data["comments"] = comments_data
 
@@ -108,9 +121,18 @@ class EventsViewSet(mixins.CreateModelMixin,
                 if user:
                     event = Events.objects.get(title=data.get("title", False), user=user)
                     if event:
+                        validated_data = {
+                                'user': user,
+                                'event': event,
+                                'is_liked': True
+                        }
+
+                        user_like = UserEventLike.objects.create(**validated_data)
+
                         likes = event.likes
                         event.likes = likes + 1
                         event.save()
+
                         serializer = EventsSerializer(event, context={'request': request})
 
                         return Response(serializer.data,status=status.HTTP_200_OK)
@@ -128,9 +150,14 @@ class EventsViewSet(mixins.CreateModelMixin,
                 if user:
                     event = Events.objects.get(title=data.get("title", False), user=user)
                     if event:
-                        likes = event.likes
-                        event.likes = likes - 1
-                        event.save()
+                        user_like = UserEventLike.objects.get(user=user, event=event)
+                        if user_like:
+                            user_like.delete()
+
+                            likes = event.likes
+                            event.likes = likes - 1
+                            event.save()
+
                         serializer = EventsSerializer(event, context={'request': request})
 
                         return Response(serializer.data, status=status.HTTP_200_OK)

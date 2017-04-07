@@ -31,6 +31,12 @@ class CommentEvent(models.Model):
         verbose_name = "Comment Event"
         verbose_name_plural = "Comments Events"
 
+class UserEventLike(models.Model):
+    """Save like form user from event"""
+    event = models.ForeignKey(Events, on_delete=models.CASCADE, related_name='events_likes')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    is_liked = models.BooleanField(default=False)
+
 class Interests(models.Model):
     """
     Interests for Users
