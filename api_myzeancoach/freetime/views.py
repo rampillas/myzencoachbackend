@@ -220,8 +220,8 @@ class EventsViewSet(mixins.CreateModelMixin,
             user = User.objects.get(pk=request.user.id)
             if user:
                 interests = Interests.objects.filter(user=user)
+                res = []
                 if interests:
-                    res = []
                     for interest in interests:
                         serializer = InterestsSerializer(interest, context={'request': request})
                         res.append(serializer.data)
