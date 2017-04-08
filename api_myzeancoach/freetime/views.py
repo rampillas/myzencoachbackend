@@ -117,25 +117,27 @@ class EventsViewSet(mixins.CreateModelMixin,
         data = request.data
         if data:
             try:
-                user = User.objects.get(username=data.get("user_owner", False))
-                if user:
-                    event = Events.objects.get(title=data.get("title", False), user=user)
+                user_owner = User.objects.get(username=data.get("user_owner", False))
+                if user_owner:
+                    event = Events.objects.get(title=data.get("title", False), user=user_owner)
                     if event:
-                        validated_data = {
-                                'user': user,
-                                'event': event,
-                                'is_liked': True
-                        }
+                        user = User.objects.get(pk=request.user.id)
+                        if user:
+                            validated_data = {
+                                    'user': user,
+                                    'event': event,
+                                    'is_liked': True
+                            }
 
-                        user_like = UserEventLike.objects.create(**validated_data)
+                            user_like = UserEventLike.objects.create(**validated_data)
 
-                        likes = event.likes
-                        event.likes = likes + 1
-                        event.save()
+                            likes = event.likes
+                            event.likes = likes + 1
+                            event.save()
 
-                        serializer = EventsSerializer(event, context={'request': request})
+                            serializer = EventsSerializer(event, context={'request': request})
 
-                        return Response(serializer.data,status=status.HTTP_200_OK)
+                            return Response(serializer.data,status=status.HTTP_200_OK)
             except Exception as e:
                 pass
 
@@ -146,21 +148,23 @@ class EventsViewSet(mixins.CreateModelMixin,
         data = request.data
         if data:
             try:
-                user = User.objects.get(username=data.get("user_owner", False))
-                if user:
-                    event = Events.objects.get(title=data.get("title", False), user=user)
+                user_owner = User.objects.get(username=data.get("user_owner", False))
+                if user_owner:
+                    event = Events.objects.get(title=data.get("title", False), user=user_owner)
                     if event:
-                        user_like = UserEventLike.objects.get(user=user, event=event)
-                        if user_like:
-                            user_like.delete()
+                        user = User.objects.get(pk=request.user.id)
+                        if user:
+                            user_like = UserEventLike.objects.get(user=user, event=event)
+                            if user_like:
+                                user_like.delete()
 
-                            likes = event.likes
-                            event.likes = likes - 1
-                            event.save()
+                                likes = event.likes
+                                event.likes = likes - 1
+                                event.save()
 
-                        serializer = EventsSerializer(event, context={'request': request})
+                            serializer = EventsSerializer(event, context={'request': request})
 
-                        return Response(serializer.data, status=status.HTTP_200_OK)
+                            return Response(serializer.data, status=status.HTTP_200_OK)
             except Exception as e:
                 pass
 
