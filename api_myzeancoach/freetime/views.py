@@ -235,3 +235,20 @@ class EventsViewSet(mixins.CreateModelMixin,
             pass
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    @detail_route(methods=['post'], url_path='deleteInterestsUser')
+    def delete_interests_user(self, request, **kwargs):
+        try:
+            user = User.objects.get(pk=request.user.id)
+            if user:
+                interests = Interests.objects.filter(user=user)
+                res = []
+                if interests:
+                    for interest in interests:
+                        interest.delete()
+
+                return Response(status=status.HTTP_200_OK)
+        except Exception as e:
+            pass
+
+        return Response(status=status.HTTP_400_BAD_REQUEST)
