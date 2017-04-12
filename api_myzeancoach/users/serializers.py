@@ -14,7 +14,7 @@ class ProfileSerializer(serializers.HyperlinkedModelSerializer):
         model = Profile
         fields = (
             'birthday', 'gender', 'country', 'city', 'description', 'rural_zone','change_country',
-            'level_studies'
+            'level_studies', 'notification_token'
         )
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):

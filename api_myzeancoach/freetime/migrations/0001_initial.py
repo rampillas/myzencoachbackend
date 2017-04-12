@@ -47,6 +47,19 @@ class Migration(migrations.Migration):
                 ('name', models.TextField(default=None, blank=True)),
                 ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
             ],
+            options={
+                'verbose_name': 'Interests',
+                'verbose_name_plural': 'Interests',
+            },
+        ),
+        migrations.CreateModel(
+            name='UserEventLike',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('is_liked', models.BooleanField(default=False)),
+                ('event', models.ForeignKey(related_name='events_likes', to='freetime.Events')),
+                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+            ],
         ),
         migrations.AddField(
             model_name='commentevent',

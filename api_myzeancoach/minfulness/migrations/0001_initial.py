@@ -21,6 +21,7 @@ class Migration(migrations.Migration):
                 ('audio_url', models.TextField(default=None, blank=True)),
                 ('instructions', models.TextField(default=None, blank=True)),
                 ('feedback', models.TextField(default=None, blank=True)),
+                ('appreciation', models.TextField(default=None, blank=True)),
             ],
             options={
                 'verbose_name': 'Exercise',
@@ -34,6 +35,7 @@ class Migration(migrations.Migration):
                 ('question', models.TextField(default=None, blank=True)),
                 ('answer', models.BooleanField(default=False)),
                 ('is_answered', models.BooleanField(default=False)),
+                ('response', models.TextField(default=None, blank=True)),
                 ('exercises', models.ForeignKey(related_name='question_exercises', to='minfulness.Exercise')),
             ],
             options={
@@ -47,6 +49,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('date', models.DateTimeField(auto_now_add=True, verbose_name='date')),
                 ('description', models.TextField(default=None, blank=True)),
+                ('is_finished', models.BooleanField(default=False)),
                 ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
             ],
             options={
