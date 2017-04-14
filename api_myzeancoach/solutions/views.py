@@ -7,6 +7,8 @@ from models import Dilemma,CommentDilemma,CommentDilemmaCoach,ProCommentDilemma,
 from users.permissions import IsAuthenticatedOrCreateOrRecoverOnly, IsOwnerOrReadOrRecoverOnly
 from django.contrib.auth.models import User
 
+from notifications import pushy
+
 class DilemmaViewSet(mixins.CreateModelMixin,
                   mixins.RetrieveModelMixin,
                   mixins.ListModelMixin,
@@ -183,9 +185,22 @@ class DilemmaViewSet(mixins.CreateModelMixin,
                         dilemma.state = data.get("state", False)
                         dilemma.save()
 
+                        #Notifications
+                        if data.get("state", False) == "acepted":
+                            users = User.objects.all()
+                            if users:
+                                for user in users:
+                                    if user.profile.notification_token:
+                                        # Payload data you want to send to devices
+                                        data = {'message': user.username + ' ha planteado un dilema. Ayudale a resolverlo'}
+                                        # The recipient device tokens
+                                        deviceTokens = [user.profile.notification_token]
+                                        # Send the push notification with Pushy
+                                        pushy.PushyAPI.sendPushNotification(data, deviceTokens)
+
                         return Response(status=status.HTTP_200_OK)
             except Exception as e:
-                pass
+                print(e)
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
