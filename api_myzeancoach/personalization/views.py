@@ -93,9 +93,14 @@ class RemindersViewSet(mixins.CreateModelMixin,
             reminders = Reminders.objects.all()
             res = []
             if reminders:
-                for reminder in reminders:
-                    serializer = RemindersSerializer(reminder, context={'request': request})
-                    res.append(serializer.data)
+
+                page = self.paginate_queryset(reminders)
+                if page is not None:
+                    serializer = self.get_serializer(page, many=True)
+                    return self.get_paginated_response(serializer.data)
+                serializer = self.get_serializer(page, many=True)
+                res.append(serializer.data)
+
                 return Response({"results":res},status=status.HTTP_200_OK)
         except Exception as e:
             pass
@@ -330,9 +335,14 @@ class CoachFollowUpViewSet(mixins.CreateModelMixin,
             recomendations = CoachFollowUp.objects.all()
             res = []
             if recomendations:
-                for recomendation in recomendations:
-                    serializer = CoachFollowUpSerializer(recomendation, context={'request': request})
-                    res.append(serializer.data)
+
+                page = self.paginate_queryset(recomendations)
+                if page is not None:
+                    serializer = self.get_serializer(page, many=True)
+                    return self.get_paginated_response(serializer.data)
+                serializer = self.get_serializer(page, many=True)
+                res.append(serializer.data)
+
                 return Response({"results": res}, status=status.HTTP_200_OK)
         except Exception as e:
             pass

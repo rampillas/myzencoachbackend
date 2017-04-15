@@ -7,7 +7,7 @@ SECRET_KEY = 'p@5zuzfi7pdxuvc203rw8qt$#m)$8x^9k&ne6*0m^n&)dn4v9u'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.0.3','proto-fep.com']
+ALLOWED_HOSTS = ['192.168.0.4','proto-fep.com']
 
 # Application definition
 SITE_ID = 1
@@ -145,7 +145,7 @@ REST_FRAMEWORK = {
          'rest_framework.filters.SearchFilter'
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 20
+    'PAGE_SIZE': 10
 }
 
 if DEBUG:

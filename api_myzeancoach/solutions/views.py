@@ -54,51 +54,14 @@ class DilemmaViewSet(mixins.CreateModelMixin,
                 dilemmas = Dilemma.objects.filter(state=data.get("state",False))
                 res = []
                 if dilemmas:
-                    for dilemma in dilemmas:
-                        serializer = DilemmaSerializer(dilemma, context={'request': request})
-                        dilemma_data = serializer.data
 
-                        #Comments from users
-                        comments_data = []
-                        comments = CommentDilemma.objects.filter(dilemma=dilemma)
-                        if comments:
-                            for comment in comments:
-                                comment_serializer = CommentDilemmaSerializer(comment,context={'request': request})
-                                res_comment = comment_serializer.data
+                    page = self.paginate_queryset(dilemmas)
+                    if page is not None:
+                        serializer = self.get_serializer(page, many=True)
+                        return self.get_paginated_response(serializer.data)
+                    serializer = self.get_serializer(page, many=True)
+                    res.append(serializer.data)
 
-                                #Pros for comments
-                                pros_data = []
-                                pros = ProCommentDilemma.objects.filter(pro_dilemma=comment)
-                                if pros:
-                                    for pro in pros:
-                                        pro_serializer = ProCommentDilemmaSerializer(pro,context={'request': request})
-                                        pros_data.append(pro_serializer.data)
-
-                                res_comment['pros'] = pros_data
-
-                                #Cons for comments
-                                cons_data = []
-                                cons = ConCommentDilemma.objects.filter(con_dilemma=comment)
-                                if cons:
-                                    for con in cons:
-                                        con_serializer = ConCommentDilemmaSerializer(con, context={'request': request})
-                                        cons_data.append(con_serializer.data)
-
-                                res_comment['cons'] = cons_data
-
-                                comments_data.append(res_comment)
-
-                        # Comments from coach
-                        comments_coach_data = []
-                        comments_coach = CommentDilemmaCoach.objects.filter(dilemma_coach=dilemma)
-                        if comments_coach:
-                            for comment in comments_coach:
-                                comment_coach_serializer = CommentDilemmaCoachSerializer(comment,context={'request': request})
-                                comments_coach_data.append(comment_coach_serializer.data)
-
-                        dilemma_data["comments"] = comments_data
-                        dilemma_data["comments_coach"] = comments_coach_data
-                        res.append(dilemma_data)
                     return Response({"results": res}, status=status.HTTP_200_OK)
             except Exception as e:
                 pass
@@ -385,52 +348,14 @@ class DilemmaViewSet(mixins.CreateModelMixin,
             dilemmas = Dilemma.objects.filter(user_id = request.user.id)
             res = []
             if dilemmas:
-                for dilemma in dilemmas:
-                    serializer = DilemmaSerializer(dilemma, context={'request': request})
-                    dilemma_data = serializer.data
 
-                    # Comments from users
-                    comments_data = []
-                    comments = CommentDilemma.objects.filter(dilemma=dilemma)
-                    if comments:
-                        for comment in comments:
-                            comment_serializer = CommentDilemmaSerializer(comment, context={'request': request})
-                            res_comment = comment_serializer.data
+                page = self.paginate_queryset(dilemmas)
+                if page is not None:
+                    serializer = self.get_serializer(page, many=True)
+                    return self.get_paginated_response(serializer.data)
+                serializer = self.get_serializer(page, many=True)
+                res.append(serializer.data)
 
-                            # Pros for comments
-                            pros_data = []
-                            pros = ProCommentDilemma.objects.filter(pro_dilemma=comment)
-                            if pros:
-                                for pro in pros:
-                                    pro_serializer = ProCommentDilemmaSerializer(pro, context={'request': request})
-                                    pros_data.append(pro_serializer.data)
-
-                            res_comment['pros'] = pros_data
-
-                            # Cons for comments
-                            cons_data = []
-                            cons = ConCommentDilemma.objects.filter(con_dilemma=comment)
-                            if cons:
-                                for con in cons:
-                                    con_serializer = ConCommentDilemmaSerializer(con, context={'request': request})
-                                    cons_data.append(con_serializer.data)
-
-                            res_comment['cons'] = cons_data
-
-                            comments_data.append(res_comment)
-
-                    # Comments from coach
-                    comments_coach_data = []
-                    comments_coach = CommentDilemmaCoach.objects.filter(dilemma_coach=dilemma)
-                    if comments_coach:
-                        for comment in comments_coach:
-                            comment_coach_serializer = CommentDilemmaCoachSerializer(comment,
-                                                                                     context={'request': request})
-                            comments_coach_data.append(comment_coach_serializer.data)
-
-                    dilemma_data["comments"] = comments_data
-                    dilemma_data["comments_coach"] = comments_coach_data
-                    res.append(dilemma_data)
                 return Response({"results": res}, status=status.HTTP_200_OK)
 
         except Exception as e:
