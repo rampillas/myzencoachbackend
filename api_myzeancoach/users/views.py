@@ -1,18 +1,16 @@
 import json
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
-from models import update_profile,Emoticon
+from models import update_profile,Emoticon,UserConnections
 from rest_framework import mixins,viewsets
 from rest_framework import status
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 from users.permissions import IsAuthenticatedOrCreateOrRecoverOnly, IsOwnerOrReadOrRecoverOnly
 from users.serializers import UserSerializer
-from serializers import EmoticonSerializer
+from serializers import EmoticonSerializer,UserConnectionsSerializer
 from users.forms import PasswordResetForm
 from django.contrib.auth.tokens import default_token_generator
-from django.conf import settings
-import urllib2
 from django.http import HttpResponse
 
 class UserViewSet(mixins.CreateModelMixin,
@@ -206,3 +204,69 @@ class EmoticonViewSet(mixins.CreateModelMixin,
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response({},status=status.HTTP_400_BAD_REQUEST)
+
+class UserConnectionsViewSet(mixins.CreateModelMixin,
+                          mixins.RetrieveModelMixin,
+                          mixins.ListModelMixin,
+                          viewsets.GenericViewSet):
+
+    permission_classes = (IsAuthenticatedOrCreateOrRecoverOnly, IsOwnerOrReadOrRecoverOnly)
+    lookup_field = 'username'
+    lookup_value_regex = '[^/]+'
+    queryset = UserConnections.objects.all()
+    serializer_class = UserConnectionsSerializer
+
+    def create(self, request, *args, **kwargs):
+        # Get body data form request
+        data = request.data
+        if data:
+            validate_data = {
+                "user": request.user
+            }
+            # Create User Connection
+            connection = UserConnections.objects.create(**validate_data)
+            if connection:
+                serializer = UserConnectionsSerializer(connection, context={'request': request})
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+    @detail_route(methods=['post'], url_path='getUsersConnections')
+    def get_users_connections(self, request, **kwargs):
+        try:
+            query = "select 1 as id, u.username,count(uc.date) as connections from users_userconnections uc " \
+                    "inner join auth_user u on u.id = uc.user_id " \
+                    "group by u.username"
+
+            res = []
+            for r in UserConnections.objects.raw(query):
+                res.append({"username": r.username, "connections": r.connections})
+
+            return Response({"results":res}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            pass
+
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    @detail_route(methods=['post'], url_path='getDetailUserConnections')
+    def get_detail_user_connections(self, request, **kwargs):
+        data = request.data
+        if data:
+            number = data.get("number_connections",False)
+            username = data.get("username",False)
+            try:
+                res = []
+                user = User.objects.get(username=username)
+                if user:
+                    connections = UserConnections.objects.filter(user_id=user.id)[:number]
+                    if connections:
+                        for con in connections:
+                            res.append({"user": con.user.username, "date": con.date})
+
+                    return Response({"results":res}, status=status.HTTP_200_OK)
+
+            except Exception as e:
+                pass
+
+        return Response(status=status.HTTP_400_BAD_REQUEST)

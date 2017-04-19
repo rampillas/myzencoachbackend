@@ -6,6 +6,7 @@ from . import views
 router = routers.SimpleRouter()
 router.register(r'users', views.UserViewSet)
 router.register(r'emoticon', views.EmoticonViewSet)
+router.register(r'userConnections', views.UserConnectionsViewSet)
 
 urlpatterns = patterns(
     '',

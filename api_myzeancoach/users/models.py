@@ -48,3 +48,12 @@ class Emoticon(models.Model):
     name = models.CharField(max_length=100,blank=True)
     is_positive = models.BooleanField(blank=True)
     date = models.DateTimeField(_(u'date'), auto_now_add=True)
+
+
+class UserConnections(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    date = models.DateTimeField(_(u'date'), auto_now_add=True)
+
+    class Meta:
+        verbose_name = "User Connections"
+        verbose_name_plural = "User Connections"

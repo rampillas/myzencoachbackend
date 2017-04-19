@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.contrib.auth.models import User
-from models import Profile,Emoticon
+from models import Profile,Emoticon, UserConnections
 from rest_framework import serializers,validators
 from django.core.validators import RegexValidator, EmailValidator
 from django.utils.translation import ugettext_lazy as _
@@ -50,4 +50,18 @@ class EmoticonSerializer(serializers.HyperlinkedModelSerializer):
         model = Emoticon
         fields = (
             'name', 'is_positive', 'date'
+        )
+
+class UserConnectionsSerializer(serializers.HyperlinkedModelSerializer):
+
+    user = serializers.HyperlinkedRelatedField(
+        view_name='user-detail',
+        lookup_field='username',
+        read_only=True
+    )
+
+    class Meta:
+        model = UserConnections
+        fields = (
+            'user', 'date'
         )
