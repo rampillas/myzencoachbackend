@@ -139,6 +139,7 @@ class DilemmaViewSet(mixins.CreateModelMixin,
     @detail_route(methods=['post'], url_path='updateDilemma')
     def update_dilemma(self, request, **kwargs):
         data = request.data
+        message = "OK"
         if data:
             try:
                 user = User.objects.get(username=data.get("username", False))
@@ -163,9 +164,9 @@ class DilemmaViewSet(mixins.CreateModelMixin,
 
                         return Response(status=status.HTTP_200_OK)
             except Exception as e:
-                print(e)
+                message = str(e)
 
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+        return Response({"detail": message},status=status.HTTP_200_OK)
 
     @detail_route(methods=['post'], url_path='addCommentDilemma')
     def add_comment_dilemma(self, request, **kwargs):

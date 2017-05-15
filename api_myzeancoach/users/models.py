@@ -37,7 +37,7 @@ def update_profile(username, data):
         user.profile.rural_zone = data.get("rural_zone", False)
         user.profile.change_country = data.get("change_country", False)
         user.profile.level_studies = data.get("level_studies", False)
-        user.profile.notification_token = data.get("notification_token", False)
+        user.profile.notification_token = data.get("notification_token", False) or ""
         user.save()
 
     return user
